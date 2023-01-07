@@ -23,10 +23,10 @@ Usage
 
 Options
 
-`--compress or -c: Compress the specified path.`
-`--decompress or -d: Decompress the specified path.`
-`--path or -p: The path to work with. Required.`
-`--password or -ps: The password to use for encryption or decryption. Required.`
+```--compress or -c: Compress the specified path.
+--decompress or -d: Decompress the specified path.
+--path or -p: The path to work with. Required.
+--password or -ps: The password to use for encryption or decryption. Required.```
 
 Note
 - This utility will walk through all files in the specified directory and its subdirectories. Make sure you have the necessary permissions to access and modify these files.
