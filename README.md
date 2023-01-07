@@ -9,7 +9,7 @@ git clone https://github.com/KiwiTG/USB-Crypt.git
 cd USB-Crypt
 ```
 
-REQUIREMENTS
+Requirements
 ```
 pip install gzip
 pip install cryptography
