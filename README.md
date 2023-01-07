@@ -22,6 +22,7 @@ Usage
 `python/3 main.py [-h] [--compress | --decompress] --path PATH --password PASSWORD`
 
 Options
+
 `--compress or -c: Compress the specified path.`
 `--decompress or -d: Decompress the specified path.`
 `--path or -p: The path to work with. Required.`
