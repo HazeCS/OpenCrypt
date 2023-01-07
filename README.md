@@ -3,35 +3,31 @@
 - A command line utility to compress and encrypts or decompress and decrypts a directory using GZip and encryption.
 - USB-Crypt uses the up-to-date fernet encryption featuring AES encryption algorithim.
 
-###Installation
+Installation
 ```
 git clone https://github.com/KiwiTG/USB-Crypt.git
 cd USB-Crypt
 ```
 
-###REQUIREMENTS
+REQUIREMENTS
 ```
 pip install gzip
 pip install cryptography
 pip install argparse
 ```
 
-###Usage
+Usage
 - To compress and encrypt a hard drive/usb stick load the script onto the drive and use `.` as the path
 `python/3 main.py [-h] [--compress | --decompress] --path PATH --password PASSWORD`
 
-###Options
+Options
 `--compress or -c: Compress the specified path.`
 `--decompress or -d: Decompress the specified path.`
 `--path or -p: The path to work with. Required.`
 `--password or -ps: The password to use for encryption or decryption. Required.`
 
-###Examples
-
-###Note
+Note
 - This utility will walk through all files in the specified directory and its subdirectories. Make sure you have the necessary permissions to access and modify these files.
-
-###DISCLAIMER
 
 Disclaimer:
 
