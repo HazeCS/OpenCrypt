@@ -1,6 +1,6 @@
 # USB-Crypt
 
-- A command line utility to compress and encrypts or decompress and decrypts a directory using GZip and encryption.
+- A command line utility to compress and encrypts or decompress and decrypts a directory using GZip and fernet encryption.
 - USB-Crypt uses the up-to-date fernet encryption featuring AES encryption algorithim.
 
 Installation
