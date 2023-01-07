@@ -18,6 +18,7 @@ pip install argparse
 
 Usage
 - To compress and encrypt a hard drive/usb stick load the script onto the drive and use `.` as the path
+
 `python/3 main.py [-h] [--compress | --decompress] --path PATH --password PASSWORD`
 
 Options
