@@ -1,7 +1,8 @@
-import gzip
+import tarfile
 import os
 import base64
 import argparse
+import shutil
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -9,8 +10,6 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 def encrypt_data(data, password):
     salt = os.urandom(16)
 
-    print('Generating key using PBKDF2...')
-
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -19,21 +18,15 @@ def encrypt_data(data, password):
     )
 
     key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
-
-    print('Key generated.')
-    print('Encrypting data with key...')
 
     f = Fernet(key)
     encrypted_data = f.encrypt(data)
 
-    print('Data encrypted.')
-
-    return salt + encrypted_data
+    return (salt + encrypted_data).hex()
 
 def decrypt_data(encrypted_data, password):
+    encrypted_data = bytes.fromhex(encrypted_data)
     salt = encrypted_data[:16]
-
-    print('Generating key using PBKDF2...')
 
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
@@ -44,69 +37,91 @@ def decrypt_data(encrypted_data, password):
 
     key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
 
-    print('Key generated.')
-    print('Decrypting data with key...')
-
     f = Fernet(key)
     data = f.decrypt(encrypted_data[16:])
 
-    print('Data decrypted.')
+    return data.decode()
 
-    return data
+def compress(folder_name):
+    # Iterate through all the files in the directory
+    for root, dirs, files in os.walk(folder_name):
+        for filename in files:
+            # Get the full path of the file
+            file_path = os.path.join(root, filename)
+            
+            try:
+                # Read the file
+                read_file = open(file_path, 'r')
+                data = read_file.read().encode()
+                read_file.close()
 
-def compress_gzip(path, password):
-    print('Walking through all files in given path...')
+                # Open the file to encrypt
+                with open(file_path, 'w') as f:
+                    # Encrypt the file
+                    f.write(encrypt_data(data, 'secret'))
+            except:
+                print(f"Failed to encrypt {file_path}")
+    
+    # Create a TarFile object
+    tar = tarfile.open(f"{folder_name}.tar.gz", "w:gz", compresslevel=9)
+    
+    # Add the folder to the TarFile object
+    tar.add(folder_name, arcname=os.path.basename(folder_name))
+    
+    # Close the TarFile object
+    tar.close()
+    
+    # Remove target folder
+    shutil.rmtree(folder_name, ignore_errors=True)
+    
+    print(f"Successfully compressed {folder_name} to {folder_name}.tar.gz")
 
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            file_path = os.path.join(root, file)
+def decompress(file_name):
+    # Create a TarFile object
+    tar = tarfile.open(file_name, "r:gz")
+    
+    # Extract the contents of the TarFile object
+    tar.extractall()
+    
+    # Close the TarFile object
+    tar.close()
+    
+    # Iterate through all the files in the directory (including subdirectories)
+    for root, dirs, files in os.walk(file_name.replace(".tar.gz", "")):
+        for filename in files:
+            # Get the full path of the file
+            file_path = os.path.join(root, filename)
 
-            print('Processing file:', file_path)
+            try:
+                # Read the file
+                read_file = open(file_path, 'r')
+                data = read_file.read()
+                read_file.close()
 
-            with open(file_path, 'rb') as f_in:
-                data = f_in.read()
-                encrypted_data = encrypt_data(data, password)
+                # Open the file to decrypt
+                with open(file_path, 'w') as f:
+                    # Decrypt the file
+                    f.write(decrypt_data(data, 'secret'))
+            
+            except:
+                print(f"Failed to decrypt {file_path}")
+    
+    # Remove target archive
+    os.remove(file_name)
+    
+    print(f"Successfully decompressed {file_name}")
 
-                with gzip.GzipFile(file_path + '.gz', 'wb', compresslevel=9) as f_out:
-                    f_out.write(encrypted_data)
+if __name__ == "__main__":
+    # Prompt the user for the desired option (compress or decompress)
+    option = input("Enter 'c' to compress or 'd' to decompress: ")
+    
+    # Prompt the user for the name of the folder to process
+    folder_name = input("Enter the name of the folder to process: ")
+    password = input("Enter the password: ")
 
-            print('Removing original file...')
-
-            os.remove(file_path)
-
-def decompress_gzip(path, password):
-    print('Walking through all files in given path...')
-
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            if file.endswith('.gz'):
-                file_path = os.path.join(root, file)
-
-                print('Processing file:', file_path)
-
-                with gzip.open(file_path, 'rb') as f_in:
-                    encrypted_data = f_in.read()
-                    data = decrypt_data(encrypted_data, password)
-
-                    with open(file_path[:-3], 'wb') as f_out:
-                        f_out.write(data)
-
-                print('Removing gzip file...')
-
-                os.remove(file_path)
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--compress', '-c', action='store_true', help='compress the specified path')
-parser.add_argument('--decompress', '-d', action='store_true', help='decompress the specified path')
-parser.add_argument('--path', '-p', type=str, required=True, help='the path to work with')
-parser.add_argument('--password', '-ps', type=str, required=True, help='the password to use for encryption or decryption')
-args = parser.parse_args()
-
-if not (args.compress or args.decompress):
-    print('Error: a command must be specified. Use the -h flag to see the available commands.')
-
-if args.compress:
-    compress_gzip(args.path, args.password)
-
-if args.decompress:
-    decompress_gzip(args.path, args.password)
+    if option == 'c':
+        compress(folder_name)
+    elif option == 'd':
+        decompress(folder_name)
+    else:
+        print("Invalid option")
