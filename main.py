@@ -42,7 +42,7 @@ def decrypt_data(encrypted_data, password):
 
     return data.decode()
 
-def compress(folder_name):
+def compress(folder_name, password):
     # Iterate through all the files in the directory
     for root, dirs, files in os.walk(folder_name):
         for filename in files:
@@ -58,7 +58,7 @@ def compress(folder_name):
                 # Open the file to encrypt
                 with open(file_path, 'w') as f:
                     # Encrypt the file
-                    f.write(encrypt_data(data, 'secret'))
+                    f.write(encrypt_data(data, password))
             except:
                 print(f"Failed to encrypt {file_path}")
     
@@ -76,7 +76,7 @@ def compress(folder_name):
     
     print(f"Successfully compressed {folder_name} to {folder_name}.tar.gz")
 
-def decompress(file_name):
+def decompress(file_name, password):
     # Create a TarFile object
     tar = tarfile.open(file_name, "r:gz")
     
@@ -101,7 +101,7 @@ def decompress(file_name):
                 # Open the file to decrypt
                 with open(file_path, 'w') as f:
                     # Decrypt the file
-                    f.write(decrypt_data(data, 'secret'))
+                    f.write(decrypt_data(data, password))
             
             except:
                 print(f"Failed to decrypt {file_path}")
@@ -111,17 +111,26 @@ def decompress(file_name):
     
     print(f"Successfully decompressed {file_name}")
 
-if __name__ == "__main__":
-    # Prompt the user for the desired option (compress or decompress)
-    option = input("Enter 'c' to compress or 'd' to decompress: ")
-    
-    # Prompt the user for the name of the folder to process
-    folder_name = input("Enter the name of the folder to process: ")
-    password = input("Enter the password: ")
+parser = argparse.ArgumentParser()
 
-    if option == 'c':
-        compress(folder_name)
-    elif option == 'd':
-        decompress(folder_name)
-    else:
-        print("Invalid option")
+# Add the compress/decompress options
+group = parser.add_mutually_exclusive_group(required=True)
+group.add_argument("--compress", "-c", action="store_true", help="Compress the specified path")
+group.add_argument("--decompress", "-d", action="store_true", help="Decompress the specified path")
+
+# Add the path and password arguments
+parser.add_argument("--path", "-p", required=True, help="The path to work with")
+parser.add_argument("--password", "-ps", required=True, help="The password to use for encryption or decryption")
+
+args = parser.parse_args()
+
+# Get the path and password from the arguments
+path = args.path
+password = args.password
+
+# Check the option specified and call the appropriate function
+if args.compress:
+    compress(path, password)
+elif args.decompress:
+    decompress(path, password)
+
