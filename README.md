@@ -11,7 +11,7 @@ cd USB-Crypt
 
 Requirements
 ```
-pip install gzip
+pip install tarfile
 pip install cryptography
 pip install argparse
 ```
