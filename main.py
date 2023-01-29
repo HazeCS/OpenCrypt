@@ -1,3 +1,5 @@
+#!/bin/python3
+
 import tarfile
 import os
 import base64
