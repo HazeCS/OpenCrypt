@@ -1,7 +1,7 @@
 # **OpenCrypt**
 
 - A command line utility to compress and encrypts or decompress and decrypts a directory using GZip and fernet encryption.
-- USB-Crypt uses the up-to-date fernet encryption featuring AES encryption algorithim.
+- OpenCrypt uses the up-to-date fernet encryption featuring AES encryption algorithim.
 
 Installation
 ```
@@ -16,7 +16,7 @@ pip install argparse
 ```
 
 Usage
-- To compress and encrypt a hard drive/usb stick load the script onto the drive and use `.` or your folder name as the path
+- To compress and encrypt a folder use the commands below on your folder
 
 `python/3 main.py [-h] [--compress | --decompress] --path PATH --password PASSWORD`
 
